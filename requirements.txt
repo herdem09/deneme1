@@ -1,3 +1,2 @@
-flask
-requests
-uvicorn
+Flask==2.1.2
+requests==2.26.0
