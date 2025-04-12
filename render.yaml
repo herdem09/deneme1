@@ -1,12 +1,9 @@
 services:
   - type: web
-    name: flask-app
+    name: smart-home-server
     env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python app.py"
-    port: 4999
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
     envVars:
-      - key: FLASK_APP
-        value: app.py
-      - key: FLASK_ENV
-        value: production
+      - key: PYTHON_VERSION
+        value: 3.9.12
