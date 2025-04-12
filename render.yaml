@@ -5,6 +5,3 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
-    envVars:
-      - key: SERVER_IP
-        value: http://10.0.0.175:5000/api/durum
