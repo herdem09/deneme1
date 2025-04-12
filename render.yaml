@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: flask-app
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    port: 4999
+    envVars:
+      - key: FLASK_APP
+        value: app.py
+      - key: FLASK_ENV
+        value: production
