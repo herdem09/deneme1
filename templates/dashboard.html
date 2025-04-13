@@ -3,610 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akıllı Ev Kontrol Paneli</title>
-    <link rel="icon" href="https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #3494e6;
-            --secondary: #ec6ead;
-            --success: #28a745;
-            --danger: #dc3545;
-            --light: #f8f9fa;
-            --dark: #343a40;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            min-height: 100vh;
-        }
-        
-        .navbar {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .navbar-brand img {
-            height: 40px;
-            margin-right: 10px;
-        }
-        
-        .dashboard-container {
-            padding: 30px 0;
-        }
-        
-        .control-card {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            overflow: hidden;
-            height: 100%;
-        }
-        
-        .control-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
-        }
-        
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #eeeeee;
-            font-weight: 600;
-            font-size: 1.2rem;
-            padding: 15px 20px;
-        }
-        
-        .card-body {
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-        }
-        
-        .device-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: var(--primary);
-            transition: all 0.5s ease;
-        }
-        
-        .device-status {
-            font-size: 18px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-            margin-bottom: 15px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background-color: var(--success);
-        }
-        
-        input:focus + .slider {
-            box-shadow: 0 0 1px var(--success);
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        
-        .footer {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-            margin-top: 30px;
-        }
-        
-        .btn-save {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-top: 30px;
-            box-shadow: 0 5px 15px rgba(52, 148, 230, 0.3);
-        }
-        
-        .btn-save:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(52, 148, 230, 0.4);
-        }
-        
-        .btn-refresh {
-            background-color: #6c757d;
-            color: white;
-            margin-left: 10px;
-        }
-        
-        .saving-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        
-        .saving-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .saving-spinner {
-            width: 70px;
-            height: 70px;
-            margin-bottom: 20px;
-        }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-fadeInUp {
-            animation: fadeInUp 0.5s ease forwards;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 5px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            z-index: 9999;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        
-        .notification.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .notification.success {
-            background-color: var(--success);
-        }
-        
-        .notification.error {
-            background-color: var(--danger);
-        }
-        
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .control-card {
-                margin-bottom: 15px;
-            }
-            
-            .btn-save {
-                width: 100%;
-                margin-top: 20px;
-            }
-            
-            .btn-refresh {
-                margin-left: 0;
-                margin-top: 10px;
-                width: 100%;
-            }
-        }
-    </style>
+    <title>İTÜ MTAL Akıllı Ev Kontrol Paneli</title>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png" alt="Logo">
-                Akıllı Ev Kontrol Paneli
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/cikis"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Dashboard Main Content -->
+    <div class="header">
+        <img src="https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png" alt="İTÜ MTAL Logo" class="logo">
+        <h1>Akıllı Ev Kontrol Paneli</h1>
+    </div>
+
     <div class="dashboard-container">
-        <div class="container">
-            <div class="row">
+        <div class="side-panel">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>Hoş Geldiniz, Herdem</span>
+            </div>
+            <div class="menu">
+                <div class="menu-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Sayfa</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>İstatistikler</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Yardım</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="status-bar">
+                <div class="status">
+                    <span>Durum:</span>
+                    <span class="status-indicator online">Çevrimiçi</span>
+                </div>
+                <div class="refresh-container">
+                    <button id="yenileBtn" class="btn">
+                        <i class="fas fa-sync-alt"></i> Yenile
+                    </button>
+                </div>
+            </div>
+            
+            <div class="controls-grid">
                 <!-- Kapı Kontrolü -->
-                <div class="col-md-4 mb-4 animate-fadeInUp" style="animation-delay: 0.1s;">
-                    <div class="control-card">
-                        <div class="card-header">
-                            <i class="fas fa-door-open me-2"></i> Kapı Kontrolü
-                        </div>
-                        <div class="card-body">
-                            <i class="fas fa-door-closed device-icon" id="kapi-icon"></i>
-                            <div class="device-status" id="kapi-status">Kapalı</div>
-                            <label class="switch">
-                                <input type="checkbox" id="kapi-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
+                <div class="control-card animate__animated animate__fadeIn">
+                    <div class="control-header">
+                        <i class="fas fa-door-open"></i>
+                        <h3>Kapı Kontrolü</h3>
+                    </div>
+                    <div class="control-status">
+                        <div class="status-text">Durum: <span id="kapiDurum">Kapalı</span></div>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="kapiToggle" class="toggle">
+                        <label for="kapiToggle" class="toggle-label">
+                            <span class="toggle-inner"></span>
+                            <span class="toggle-switch"></span>
+                        </label>
+                    </div>
+                    <div id="kapi-timer" class="timer-indicator" style="display: none;">
+                        <i class="fas fa-clock"></i> <span id="kapi-timer-count">10</span> sn sonra kapanacak
                     </div>
                 </div>
-                
+
                 <!-- Vantilatör Kontrolü -->
-                <div class="col-md-4 mb-4 animate-fadeInUp" style="animation-delay: 0.2s;">
-                    <div class="control-card">
-                        <div class="card-header">
-                            <i class="fas fa-fan me-2"></i> Vantilatör Kontrolü
-                        </div>
-                        <div class="card-body">
-                            <i class="fas fa-fan device-icon" id="vantilator-icon"></i>
-                            <div class="device-status" id="vantilator-status">Kapalı</div>
-                            <label class="switch">
-                                <input type="checkbox" id="vantilator-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
+                <div class="control-card animate__animated animate__fadeIn">
+                    <div class="control-header">
+                        <i class="fas fa-fan"></i>
+                        <h3>Vantilatör Kontrolü</h3>
+                    </div>
+                    <div class="control-status">
+                        <div class="status-text">Durum: <span id="ventilatorDurum">Kapalı</span></div>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="ventilatorToggle" class="toggle">
+                        <label for="ventilatorToggle" class="toggle-label">
+                            <span class="toggle-inner"></span>
+                            <span class="toggle-switch"></span>
+                        </label>
                     </div>
                 </div>
-                
+
                 <!-- Pencere Kontrolü -->
-                <div class="col-md-4 mb-4 animate-fadeInUp" style="animation-delay: 0.3s;">
-                    <div class="control-card">
-                        <div class="card-header">
-                            <i class="fas fa-window-maximize me-2"></i> Pencere Kontrolü
-                        </div>
-                        <div class="card-body">
-                            <i class="fas fa-window-maximize device-icon" id="pencere-icon"></i>
-                            <div class="device-status" id="pencere-status">Kapalı</div>
-                            <label class="switch">
-                                <input type="checkbox" id="pencere-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
+                <div class="control-card animate__animated animate__fadeIn">
+                    <div class="control-header">
+                        <i class="fas fa-window-maximize"></i>
+                        <h3>Pencere Kontrolü</h3>
+                    </div>
+                    <div class="control-status">
+                        <div class="status-text">Durum: <span id="pencereDurum">Kapalı</span></div>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pencereToggle" class="toggle">
+                        <label for="pencereToggle" class="toggle-label">
+                            <span class="toggle-inner"></span>
+                            <span class="toggle-switch"></span>
+                        </label>
                     </div>
                 </div>
-                
+
                 <!-- Perde Kontrolü -->
-                <div class="col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.4s;">
-                    <div class="control-card">
-                        <div class="card-header">
-                            <i class="fas fa-blinds me-2"></i> Perde Kontrolü
-                        </div>
-                        <div class="card-body">
-                            <i class="fas fa-blinds device-icon" id="perde-icon"></i>
-                            <div class="device-status" id="perde-status">Kapalı</div>
-                            <label class="switch">
-                                <input type="checkbox" id="perde-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
+                <div class="control-card animate__animated animate__fadeIn">
+                    <div class="control-header">
+                        <i class="fas fa-blinds"></i>
+                        <h3>Perde Kontrolü</h3>
                     </div>
-                </div>
-                
-                <!-- Işık Kontrolü -->
-                <div class="col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.5s;">
-                    <div class="control-card">
-                        <div class="card-header">
-                            <i class="fas fa-lightbulb me-2"></i> Işık Kontrolü
-                        </div>
-                        <div class="card-body">
-                            <i class="fas fa-lightbulb device-icon" id="isik-icon"></i>
-                            <div class="device-status" id="isik-status">Kapalı</div>
-                            <label class="switch">
-                                <input type="checkbox" id="isik-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
+                    <div class="control-status">
+                        <div class="status-text">Durum: <span id="perdeDurum">Kapalı</span></div>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="perdeToggle" class="toggle">
+                        <label for="perdeToggle" class="toggle-label">
+                            <span class="toggle-inner"></span>
+                            <span class="toggle-switch"></span>
+                        </label>
                     </div>
                 </div>
             </div>
-            
-            <!-- Action Buttons -->
-            <div class="row mt-3">
-                <div class="col-md-12 text-center">
-                    <button class="btn btn-save" id="save-changes">
-                        <i class="fas fa-save me-2"></i> Değişiklikleri Kaydet
-                    </button>
-                    <button class="btn btn-refresh btn-secondary" id="refresh-data">
-                        <i class="fas fa-sync-alt me-2"></i> Yenile
-                    </button>
-                </div>
+
+            <div class="save-changes">
+                <button id="kaydetBtn" class="save-btn">
+                    <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                </button>
+                <div id="bildirim" class="notification" style="display: none;"></div>
             </div>
         </div>
     </div>
-    
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p class="mb-0">&copy; 2025 Akıllı Ev Sistemleri | Tüm Hakları Saklıdır</p>
-        </div>
-    </footer>
-    
-    <!-- Saving Overlay -->
-    <div class="saving-overlay" id="saving-overlay">
-        <div class="saving-content">
-            <div class="spinner-border text-primary saving-spinner" role="status">
-                <span class="visually-hidden">Kaydediliyor...</span>
-            </div>
-            <h4 class="mb-3">Değişiklikler Kaydediliyor</h4>
-            <p class="text-muted mb-0">Lütfen bekleyin...</p>
-        </div>
-    </div>
-    
-    <!-- Notification -->
-    <div class="notification" id="notification"></div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cihaz durumları
-            const deviceStates = {
-                kapi: false,
-                vantilator: false,
-                pencere: false,
-                perde: false,
-                isik: false
-            };
-            
-            // Element referansları
-            const elements = {
-                switches: {
-                    kapi: document.getElementById('kapi-switch'),
-                    vantilator: document.getElementById('vantilator-switch'),
-                    pencere: document.getElementById('pencere-switch'),
-                    perde: document.getElementById('perde-switch'),
-                    isik: document.getElementById('isik-switch')
-                },
-                icons: {
-                    kapi: document.getElementById('kapi-icon'),
-                    vantilator: document.getElementById('vantilator-icon'),
-                    pencere: document.getElementById('pencere-icon'),
-                    perde: document.getElementById('perde-icon'),
-                    isik: document.getElementById('isik-icon')
-                },
-                statuses: {
-                    kapi: document.getElementById('kapi-status'),
-                    vantilator: document.getElementById('vantilator-status'),
-                    pencere: document.getElementById('pencere-status'),
-                    perde: document.getElementById('perde-status'),
-                    isik: document.getElementById('isik-status')
-                },
-                saveBtn: document.getElementById('save-changes'),
-                refreshBtn: document.getElementById('refresh-data'),
-                savingOverlay: document.getElementById('saving-overlay'),
-                notification: document.getElementById('notification')
-            };
-            
-            // UI Güncelleme Fonksiyonu
-            function updateUI() {
-                for (const device in deviceStates) {
-                    const state = deviceStates[device];
-                    elements.switches[device].checked = state;
-                    
-                    // İkon ve durum metnini güncelle
-                    if (device === 'kapi') {
-                        elements.icons[device].className = state ? 'fas fa-door-open device-icon' : 'fas fa-door-closed device-icon';
-                    } else if (device === 'vantilator') {
-                        elements.icons[device].className = 'fas fa-fan device-icon';
-                        if (state) {
-                            elements.icons[device].style.animation = 'spin 2s linear infinite';
-                        } else {
-                            elements.icons[device].style.animation = 'none';
-                        }
-                    } else if (device === 'isik') {
-                        if (state) {
-                            elements.icons[device].className = 'fas fa-lightbulb device-icon';
-                            elements.icons[device].style.color = '#ffc107';
-                        } else {
-                            elements.icons[device].className = 'far fa-lightbulb device-icon';
-                            elements.icons[device].style.color = '#3494e6';
-                        }
-                    }
-                    
-                    elements.statuses[device].textContent = state ? 'Açık' : 'Kapalı';
-                    
-                    // İkon rengini değiştir
-                    if (device !== 'isik') { // Işık için özel durum var
-                        elements.icons[device].style.color = state ? '#28a745' : '#3494e6';
-                    }
-                }
-            }
-            
-            // Verileri Yükle
-            function fetchData() {
-                showNotification('Veriler yükleniyor...', 'info');
-                
-                fetch('/api/data', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Veri alınamadı');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    Object.assign(deviceStates, data);
-                    updateUI();
-                    showNotification('Veriler başarıyla yüklendi', 'success');
-                })
-                .catch(error => {
-                    console.error('Hata:', error);
-                    showNotification('Veri yükleme başarısız: ' + error.message, 'error');
-                });
-            }
-            
-            // Verileri Kaydet
-            function saveData() {
-                // Kaydediliyor göstergesini göster
-                elements.savingOverlay.style.visibility = 'visible';
-                elements.savingOverlay.style.opacity = '1';
-                
-                fetch('/api/data', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(deviceStates)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Veri kaydedilemedi');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Başarılı kayıt
-                    setTimeout(() => {
-                        elements.savingOverlay.style.opacity = '0';
-                        elements.savingOverlay.style.visibility = 'hidden';
-                        showNotification('Değişiklikler başarıyla kaydedildi', 'success');
-                        
-                        // Cihaz durumlarını güncelle
-                        if (data.updated) {
-                            Object.assign(deviceStates, data.updated);
-                            updateUI();
-                        }
-                    }, 1000);
-                })
-                .catch(error => {
-                    // Hata durumu
-                    elements.savingOverlay.style.opacity = '0';
-                    elements.savingOverlay.style.visibility = 'hidden';
-                    console.error('Hata:', error);
-                    showNotification('Kaydetme başarısız: ' + error.message, 'error');
-                });
-            }
-            
-            // Bildirim Göster
-            function showNotification(message, type) {
-                const notification = elements.notification;
-                notification.textContent = message;
-                notification.className = 'notification';
-                
-                if (type === 'success') {
-                    notification.classList.add('success');
-                } else if (type === 'error') {
-                    notification.classList.add('error');
-                } else {
-                    notification.style.backgroundColor = '#17a2b8'; // Info color
-                }
-                
-                notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-            
-            // Animasyon için CSS ekleme
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // Olay Dinleyicileri Ekle
-            for (const device in elements.switches) {
-                elements.switches[device].addEventListener('change', function() {
-                    deviceStates[device] = this.checked;
-                    updateUI();
-                });
-            }
-            
-            elements.saveBtn.addEventListener('click', saveData);
-            elements.refreshBtn.addEventListener('click', fetchData);
-            
-            // Sayfa yüklendiğinde verileri al
-            fetchData();
-            
-            // Kapının otomatik kapanma animasyonu için
-            function checkDoorAutoClose() {
-                if (deviceStates.kapi === true) {
-                    setTimeout(() => {
-                        deviceStates.kapi = false;
-                        updateUI();
-                        showNotification('Kapı otomatik olarak kapatıldı', 'info');
-                    }, 10000); // 10 saniye sonra kapat
-                }
-            }
-            
-            // Periyodik olarak kapı durumunu kontrol et
-            setInterval(checkDoorAutoClose, 1000);
-        });
-    </script>
+
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
