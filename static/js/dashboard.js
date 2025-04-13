@@ -1,293 +1,212 @@
-// Kontrol Paneli JavaScript Kodu
 document.addEventListener('DOMContentLoaded', function() {
-    // API Bilgileri
-    const API_URL = '/data';
+    // API anahtarı
     const API_KEY = 'herdem1940';
     
     // HTML Elementleri
-    const refreshBtn = document.getElementById('refreshBtn');
-    const saveChangesBtn = document.getElementById('saveChangesBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const connectionStatus = document.getElementById('connectionStatus');
-    const updateTimeElement = document.getElementById('updateTime');
-    const notification = document.getElementById('notification');
-    const notificationText = document.getElementById('notificationText');
+    const kapiToggle = document.getElementById('kapiToggle');
+    const ventilatorToggle = document.getElementById('ventilatorToggle');
+    const pencereToggle = document.getElementById('pencereToggle');
+    const perdeToggle = document.getElementById('perdeToggle');
     
-    // Kontrol değişkenleri
-    const controls = {
-        kapi: document.getElementById('kapi-toggle'),
-        vantilator: document.getElementById('vantilator-toggle'),
-        pencere: document.getElementById('pencere-toggle'),
-        perde: document.getElementById('perde-toggle')
-    };
-
+    const kapiDurum = document.getElementById('kapiDurum');
+    const ventilatorDurum = document.getElementById('ventilatorDurum');
+    const pencereDurum = document.getElementById('pencereDurum');
+    const perdeDurum = document.getElementById('perdeDurum');
+    
+    const kaydetBtn = document.getElementById('kaydetBtn');
+    const yenileBtn = document.getElementById('yenileBtn');
+    const bildirim = document.getElementById('bildirim');
     const kapiTimer = document.getElementById('kapi-timer');
-    let kapiTimerId = null;
+    const kapiTimerCount = document.getElementById('kapi-timer-count');
     
-    // Sayfa yüklendiğinde verileri al
-    fetchData();
+    // Veri Durumu
+    let veriDurumu = {
+        kapi: false,
+        vantilator: false,
+        pencere: false,
+        perde: false
+    };
     
-    // Yenile butonu
-    refreshBtn.addEventListener('click', function() {
-        animateRefreshButton();
-        fetchData();
-    });
+    // Güncellemeler
+    let bekleyenGuncellemeler = {};
     
-    // Değişiklikleri kaydet butonu
-    saveChangesBtn.addEventListener('click', function() {
-        saveChanges();
-    });
+    // Vantilatör animasyonu için fan ikonunu seç
+    const fanIkonu = document.querySelector('.fa-fan');
     
-    // Çıkış butonu
-    logoutBtn.addEventListener('click', function() {
-        window.location.href = 'index.html';
-    });
-    
-    // Sunucudan veri çekme fonksiyonu
-    function fetchData() {
-        showLoadingState(true);
+    // Değişkenleri güncelle
+    function arayuzuGuncelle() {
+        // Kapı durumu
+        kapiToggle.checked = veriDurumu.kapi;
+        kapiDurum.textContent = veriDurumu.kapi ? 'Açık' : 'Kapalı';
+        kapiDurum.style.color = veriDurumu.kapi ? '#2ecc71' : '#e74c3c';
         
-        fetch(API_URL, {
-            method: 'GET',
-            headers: {
-                'Authorization': API_KEY,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Sunucu bağlantısı başarısız oldu');
-            }
-            return response.json();
-        })
-        .then(data => {
-            updateUIWithData(data);
-            updateConnectionStatus(true);
-            showNotification('Veriler başarıyla güncellendi', 'success');
-        })
-        .catch(error => {
-            console.error('Veri alınamadı:', error);
-            updateConnectionStatus(false);
-            showNotification('Veri alınamadı: ' + error.message, 'error');
-        })
-        .finally(() => {
-            showLoadingState(false);
-            updateLastUpdateTime();
-        });
-    }
-    
-    // Verileri sunucuya gönderme fonksiyonu
-    function saveChanges() {
-        const updatedData = {
-            kapi: controls.kapi.checked,
-            vantilator: controls.vantilator.checked,
-            pencere: controls.pencere.checked,
-            perde: controls.perde.checked
-        };
+        // Vantilatör durumu
+        ventilatorToggle.checked = veriDurumu.vantilator;
+        ventilatorDurum.textContent = veriDurumu.vantilator ? 'Açık' : 'Kapalı';
+        ventilatorDurum.style.color = veriDurumu.vantilator ? '#2ecc71' : '#e74c3c';
         
-        // Kapı otomatik kapanma kontrolü
-        if (controls.kapi.checked) {
-            startKapiTimer();
+        // Vantilatör animasyonu
+        if (veriDurumu.vantilator) {
+            fanIkonu.classList.add('spin-animation');
         } else {
-            stopKapiTimer();
+            fanIkonu.classList.remove('spin-animation');
         }
         
-        showLoadingState(true);
+        // Pencere durumu
+        pencereToggle.checked = veriDurumu.pencere;
+        pencereDurum.textContent = veriDurumu.pencere ? 'Açık' : 'Kapalı';
+        pencereDurum.style.color = veriDurumu.pencere ? '#2ecc71' : '#e74c3c';
         
-        fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': API_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Veriler kaydedilemedi');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Güncelleme başarılı:', data);
-            updateConnectionStatus(true);
-            showNotification('Değişiklikler başarıyla kaydedildi', 'success');
-            
-            // Kapı animasyonu
-            if (updatedData.kapi) {
-                animateItem('kapi-toggle');
-            }
-        })
-        .catch(error => {
-            console.error('Veriler kaydedilemedi:', error);
-            updateConnectionStatus(false);
-            showNotification('Veriler kaydedilemedi: ' + error.message, 'error');
-        })
-        .finally(() => {
-            showLoadingState(false);
-            updateLastUpdateTime();
-        });
+        // Perde durumu
+        perdeToggle.checked = veriDurumu.perde;
+        perdeDurum.textContent = veriDurumu.perde ? 'Açık' : 'Kapalı';
+        perdeDurum.style.color = veriDurumu.perde ? '#2ecc71' : '#e74c3c';
     }
     
-    // UI'ı verilerle güncelleme fonksiyonu
-    function updateUIWithData(data) {
-        for (const [key, value] of Object.entries(data)) {
-            if (controls[key]) {
-                controls[key].checked = value === true;
-                
-                // Kapı otomatik kapanma kontrolü
-                if (key === 'kapi' && value === true) {
-                    startKapiTimer();
+    // Verileri sunucudan al
+    async function verileriGetir() {
+        try {
+            const response = await fetch('/data', {
+                method: 'GET',
+                headers: {
+                    'Authorization': API_KEY
                 }
-            }
-        }
-    }
-    
-    // Kapı otomatik kapanma zamanlayıcısı
-    function startKapiTimer() {
-        // Eğer önceki zamanlayıcı varsa temizle
-        stopKapiTimer();
-        
-        let secondsLeft = 10;
-        updateKapiTimerDisplay(secondsLeft);
-        
-        kapiTimerId = setInterval(() => {
-            secondsLeft--;
-            updateKapiTimerDisplay(secondsLeft);
+            });
             
-            if (secondsLeft <= 0) {
-                stopKapiTimer();
-                controls.kapi.checked = false;
-                
-                // Kapı kapandı bildirimi
-                showNotification('Kapı otomatik olarak kapatıldı', 'info');
-                
-                // Sunucuya kapı kapandı durumunu gönder
-                const updatedData = { kapi: false };
-                
-                fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': API_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
-                })
-                .then(response => response.json())
-                .then(data => console.log('Kapı otomatik kapatıldı:', data))
-                .catch(error => console.error('Kapı kapatma hatası:', error));
+            if (!response.ok) {
+                throw new Error('Veri alınamadı');
             }
-        }, 1000);
-    }
-    
-    // Kapı zamanlayıcısını durdurma
-    function stopKapiTimer() {
-        if (kapiTimerId !== null) {
-            clearInterval(kapiTimerId);
-            kapiTimerId = null;
-            kapiTimer.textContent = '';
+            
+            const data = await response.json();
+            
+            // Verileri güncelle
+            veriDurumu = {
+                kapi: data.kapi || false,
+                vantilator: data.vantilator || false,
+                pencere: data.pencere || false,
+                perde: data.perde || false
+            };
+            
+            // Arayüzü güncelle
+            arayuzuGuncelle();
+            
+            // Bildirim göster
+            bildirimGoster('Veriler başarıyla alındı', 'success');
+            
+        } catch (error) {
+            console.error('Veri getirme hatası:', error);
+            bildirimGoster('Veriler alınamadı! Bir hata oluştu.', 'error');
         }
     }
     
-    // Kapı zamanlayıcı ekranını güncelleme
-    function updateKapiTimerDisplay(seconds) {
-        kapiTimer.textContent = `Otomatik kapanacak: ${seconds} saniye`;
+    // Değişiklikleri sunucuya gönder
+    async function degisiklikleriKaydet() {
+        if (Object.keys(bekleyenGuncellemeler).length === 0) {
+            bildirimGoster('Kaydedilecek değişiklik yok!', 'warning');
+            return;
+        }
         
-        // Kalan zamanla renk değiştirme
-        if (seconds <= 3) {
-            kapiTimer.style.color = '#dc3545'; // Kırmızı
-        } else if (seconds <= 5) {
-            kapiTimer.style.color = '#ffc107'; // Sarı
-        } else {
-            kapiTimer.style.color = '#17a2b8'; // Mavi
+        try {
+            const response = await fetch('/data', {
+                method: 'POST',
+                headers: {
+                    'Authorization': API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bekleyenGuncellemeler)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Değişiklikler kaydedilemedi');
+            }
+            
+            const data = await response.json();
+            
+            // Mevcut durumu güncelle
+            for (const key in bekleyenGuncellemeler) {
+                veriDurumu[key] = bekleyenGuncellemeler[key];
+            }
+            
+            // Bekleyen güncellemeleri temizle
+            bekleyenGuncellemeler = {};
+            
+            // Arayüzü güncelle
+            arayuzuGuncelle();
+            
+            // Bildirim göster
+            bildirimGoster('Değişiklikler başarıyla kaydedildi', 'success');
+            
+            // Kapı açıldıysa zamanlayıcıyı başlat
+            if (veriDurumu.kapi) {
+                kapiTimerBaslat();
+            }
+            
+        } catch (error) {
+            console.error('Kaydetme hatası:', error);
+            bildirimGoster('Değişiklikler kaydedilemedi! Bir hata oluştu.', 'error');
         }
     }
     
-    // Bağlantı durumunu güncelleme
-    function updateConnectionStatus(isConnected) {
-        if (isConnected) {
-            connectionStatus.className = 'connected';
-            connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Bağlantı: Aktif';
-        } else {
-            connectionStatus.className = 'disconnected';
-            connectionStatus.innerHTML = '<i class="fas fa-plug-circle-xmark"></i> Bağlantı: Kesildi';
-        }
-    }
-    
-    // Son güncelleme zamanını ayarlama
-    function updateLastUpdateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('tr-TR');
-        updateTimeElement.textContent = timeString;
-    }
-    
-    // Yükleniyor durumunu gösterme
-    function showLoadingState(isLoading) {
-        if (isLoading) {
-            document.body.classList.add('loading');
-            refreshBtn.disabled = true;
-            saveChangesBtn.disabled = true;
-        } else {
-            document.body.classList.remove('loading');
-            refreshBtn.disabled = false;
-            saveChangesBtn.disabled = false;
-        }
-    }
-    
-    // Bildirim gösterme fonksiyonu
-    function showNotification(message, type = 'info') {
-        notification.className = 'notification ' + type;
-        notificationText.textContent = message;
+    // Bildirim göster
+    function bildirimGoster(mesaj, tur = 'success') {
+        bildirim.textContent = mesaj;
+        bildirim.style.display = 'block';
         
-        notification.classList.add('show');
+        // Bildirim stilini ayarla
+        if (tur === 'success') {
+            bildirim.style.backgroundColor = '#2ecc71';
+        } else if (tur === 'error') {
+            bildirim.style.backgroundColor = '#e74c3c';
+        } else if (tur === 'warning') {
+            bildirim.style.backgroundColor = '#f39c12';
+        }
         
+        // 3 saniye sonra bildirim kaybolsun
         setTimeout(() => {
-            notification.classList.remove('show');
+            bildirim.style.display = 'none';
         }, 3000);
     }
     
-    // Yenile butonuna animasyon ekleme
-    function animateRefreshButton() {
-        refreshBtn.classList.add('rotating');
-        setTimeout(() => {
-            refreshBtn.classList.remove('rotating');
+    // Kapı için zamanlayıcı başlat
+    function kapiTimerBaslat() {
+        let kalanSure = 10;
+        kapiTimer.style.display = 'flex';
+        
+        // Zamanlayıcı gösterim
+        const sayac = setInterval(() => {
+            kalanSure--;
+            kapiTimerCount.textContent = kalanSure;
+            
+            if (kalanSure <= 0) {
+                clearInterval(sayac);
+                kapiTimer.style.display = 'none';
+            }
         }, 1000);
     }
     
-    // Öğeye animasyon ekleme
-    function animateItem(itemId) {
-        const element = document.getElementById(itemId).parentElement.parentElement.parentElement;
-        element.classList.add('pulse-animation');
-        setTimeout(() => {
-            element.classList.remove('pulse-animation');
-        }, 1000);
-    }
+    // Toggle butonları için olay dinleyicileri
+    kapiToggle.addEventListener('change', function() {
+        bekleyenGuncellemeler.kapi = this.checked;
+    });
     
-    // CSS ile animasyon ekleme
-    const style = document.createElement('style');
-    style.textContent = `
-        body.loading {
-            cursor: progress;
-        }
-        
-        .rotating {
-            animation: rotate 1s linear;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .pulse-animation {
-            animation: pulse-item 1s ease;
-        }
-        
-        @keyframes pulse-item {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-    `;
-    document.head.appendChild(style);
+    ventilatorToggle.addEventListener('change', function() {
+        bekleyenGuncellemeler.vantilator = this.checked;
+    });
+    
+    pencereToggle.addEventListener('change', function() {
+        bekleyenGuncellemeler.pencere = this.checked;
+    });
+    
+    perdeToggle.addEventListener('change', function() {
+        bekleyenGuncellemeler.perde = this.checked;
+    });
+    
+    // Kaydet butonu için olay dinleyicisi
+    kaydetBtn.addEventListener('click', degisiklikleriKaydet);
+    
+    // Yenile butonu için olay dinleyicisi
+    yenileBtn.addEventListener('click', verileriGetir);
+    
+    // Sayfa yüklendiğinde verileri getir
+    verileriGetir();
 });
