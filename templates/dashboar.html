@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İTÜ MTAL - Akıllı Ev Kontrol Paneli</title>
+    <link rel="icon" href="https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <img src="https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png" alt="İTÜ MTAL Logo" class="logo">
+        </div>
+        <h1>Akıllı Ev Kontrol Paneli</h1>
+        <div class="header-buttons">
+            <button id="refreshBtn" class="btn btn-refresh"><i class="fas fa-sync-alt"></i> Yenile</button>
+            <button id="logoutBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Çıkış</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="status-indicator">
+            <div id="connectionStatus" class="connected">
+                <i class="fas fa-plug"></i> Bağlantı: Aktif
+            </div>
+            <div id="lastUpdate">
+                Son Güncelleme: <span id="updateTime">-</span>
+            </div>
+        </div>
+
+        <div class="dashboard-items">
+            <div class="dashboard-item">
+                <div class="item-icon">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div class="item-details">
+                    <h3>Kapı</h3>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="kapi-toggle">
+                            <span class="slider"></span>
+                            <span class="labels" data-on="AÇIK" data-off="KAPALI"></span>
+                        </label>
+                    </div>
+                    <div class="status-timer" id="kapi-timer"></div>
+                </div>
+            </div>
+
+            <div class="dashboard-item">
+                <div class="item-icon">
+                    <i class="fas fa-fan"></i>
+                </div>
+                <div class="item-details">
+                    <h3>Vantilatör</h3>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="vantilator-toggle">
+                            <span class="slider"></span>
+                            <span class="labels" data-on="AÇIK" data-off="KAPALI"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-item">
+                <div class="item-icon">
+                    <i class="fas fa-window-maximize"></i>
+                </div>
+                <div class="item-details">
+                    <h3>Pencere</h3>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="pencere-toggle">
+                            <span class="slider"></span>
+                            <span class="labels" data-on="AÇIK" data-off="KAPALI"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-item">
+                <div class="item-icon">
+                    <i class="fas fa-blinds"></i>
+                </div>
+                <div class="item-details">
+                    <h3>Perde</h3>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="perde-toggle">
+                            <span class="slider"></span>
+                            <span class="labels" data-on="AÇIK" data-off="KAPALI"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-controls">
+            <button id="saveChangesBtn" class="btn btn-primary btn-save">
+                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+            </button>
+        </div>
+
+        <div class="notification" id="notification">
+            <i class="fas fa-info-circle"></i>
+            <span id="notificationText"></span>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 İTÜ MTAL Akıllı Ev Kontrol Sistemi</p>
+    </footer>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
