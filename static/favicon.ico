@@ -1,0 +1,34 @@
+import requests
+import base64
+from PIL import Image
+from io import BytesIO
+import os
+
+# İTÜ MTAL logosu indirme
+def favicon_olustur():
+    try:
+        # Logo URL'si
+        logo_url = "https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png"
+        
+        # Logoyu indir
+        response = requests.get(logo_url)
+        
+        if response.status_code == 200:
+            # Resmi aç ve favicon boyutuna dönüştür
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((32, 32))
+            
+            # Statik klasörü oluştur ve kaydet
+            os.makedirs('static', exist_ok=True)
+            img.save('static/favicon.ico')
+            
+            print("Favicon başarıyla oluşturuldu: static/favicon.ico")
+        else:
+            print(f"Logo indirilemedi. Durum kodu: {response.status_code}")
+    
+    except Exception as e:
+        print(f"Favicon oluşturma hatası: {e}")
+
+# Bu fonksiyonu uygulamanızı başlatırken çağırabilirsiniz
+if __name__ == "__main__":
+    favicon_olustur()
