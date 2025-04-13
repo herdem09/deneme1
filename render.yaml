@@ -1,12 +1,11 @@
 # render.yaml
 services:
   - type: web
-    name: flask-data-service
+    name: smart-home-controller
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    plan: free # veya ihtiyacınıza göre starter, standard, pro, vs.
-    healthCheckPath: /health
+    plan: free
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
