@@ -4,20 +4,21 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Veri saklama için dictionary
-data_dict = {}
+# Sabit anahtarlar ile veri sözlüğü
+data_dict = {
+    "kapi": None,
+    "isik": None,
+    "pencere": None,
+    "perde": None,
+    "vantilator": None
+}
 
 # API şifremiz
 API_KEY = "herdem1940"
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Basit bir sağlık kontrolü endpoint'i"""
-    return jsonify({"status": "healthy"}), 200
-
 @app.route('/data', methods=['GET'])
 def get_data():
-    """Tüm veriyi veya belirli bir anahtarı getir"""
+    """Veri sözlüğünden veri getir"""
     # Şifre kontrolü
     auth_key = request.headers.get('Authorization', '')
     if not auth_key.startswith(API_KEY):
@@ -35,8 +36,8 @@ def get_data():
     return jsonify(data_dict), 200
 
 @app.route('/data', methods=['POST'])
-def add_data():
-    """Dictionary'e veri ekle"""
+def update_data():
+    """Veri sözlüğündeki değerleri güncelle"""
     # Şifre kontrolü
     auth_key = request.headers.get('Authorization', '')
     if not auth_key.startswith(API_KEY):
@@ -48,30 +49,19 @@ def add_data():
     
     data = request.get_json()
     
-    # En az bir anahtar-değer çifti olmalı
+    # İstek boş olmamalı
     if not data:
-        return jsonify({"error": "En az bir anahtar-değer çifti gerekli"}), 400
+        return jsonify({"error": "Güncellenecek en az bir değer gerekli"}), 400
     
-    # Veriyi dictionary'e ekle
+    # Sadece mevcut anahtarları güncelle
+    updated = {}
+    
     for key, value in data.items():
-        data_dict[key] = value
+        if key in data_dict:
+            data_dict[key] = value
+            updated[key] = value
     
-    return jsonify({"message": "Veri başarıyla eklendi", "added": data}), 201
-
-@app.route('/data/<key>', methods=['DELETE'])
-def delete_data(key):
-    """Dictionary'den veri sil"""
-    # Şifre kontrolü
-    auth_key = request.headers.get('Authorization', '')
-    if not auth_key.startswith(API_KEY):
-        return jsonify({"error": "Yetkisiz erişim"}), 401
-    
-    # Anahtarın varlığını kontrol et
-    if key in data_dict:
-        deleted_value = data_dict.pop(key)
-        return jsonify({"message": f"'{key}' başarıyla silindi", "deleted_value": deleted_value}), 200
-    else:
-        return jsonify({"error": f"'{key}' bulunamadı"}), 404
+    return jsonify({"success": True, "updated": updated}), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
