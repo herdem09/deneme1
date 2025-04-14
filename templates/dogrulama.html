@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h2>Doğrulama</h2>
+    <h2>Doğrulama Kodu Girin</h2>
     {% if hata %}
         <p class="hata">{{ hata }}</p>
     {% endif %}
     <form action="/dogrulama" method="POST">
-        <input type="text" name="dogrulama_kodu" placeholder="Kod" required>
-        <input type="text" name="uygulama_kodu" placeholder="Uygulama Kodu" required>
+        <input type="text" name="dogrulama_kodu" placeholder="6 Haneli Kod" required>
         <button type="submit">Girişe Devam</button>
     </form>
 </body>
