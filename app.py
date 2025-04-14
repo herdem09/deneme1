@@ -1,3 +1,6 @@
+import requests
+from PIL import Image
+from io import BytesIO
 import os
 import time
 import threading
@@ -23,11 +26,40 @@ SIFRE = "1940"
 # E-posta doğrulama kodu
 DOGRULAMA_KODU = "kmop hzuo yoqp ztnr"
 
+def favicon_olustur():
+    try:
+        # Logo URL'si
+        logo_url = "https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png"
+        
+        # Statik klasör var mı kontrol et
+        if not os.path.exists('static'):
+            os.makedirs('static')
+            
+        # Favicon zaten var mı kontrol et
+        if not os.path.exists('static/favicon.ico'):
+            # Logoyu indir
+            response = requests.get(logo_url)
+            
+            if response.status_code == 200:
+                # Resmi aç ve favicon boyutuna dönüştür
+                img = Image.open(BytesIO(response.content))
+                img = img.resize((32, 32))
+                
+                # Kaydet
+                img.save('static/favicon.ico')
+                print("Favicon başarıyla oluşturuldu: static/favicon.ico")
+            else:
+                print(f"Logo indirilemedi. Durum kodu: {response.status_code}")
+    
+    except Exception as e:
+        print(f"Favicon oluşturma hatası: {e}")
 # Kapı otomatik kapanma fonksiyonu
 def kapi_otomatik_kapat():
     time.sleep(10)  # 10 saniye bekle
     data_dict["kapi"] = False
     print("Kapı otomatik olarak kapatıldı.")
+
+favicon_olustur()
 
 @app.route('/')
 def index():
