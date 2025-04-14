@@ -1,11 +1,9 @@
 services:
   - type: web
-    name: itu-mtal-akilli-ev
+    name: akilli-ev-sistemi
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.9.0
-    healthCheckPath: /
-    autoDeploy: true
+      - key: PYTHONUNBUFFERED
+        value: "1"
