@@ -1,18 +1,23 @@
 import os
 import time
 import threading
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
-from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import random
-import string
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
+from functools import wraps
 
 app = Flask(__name__, static_url_path='/static')
-CORS(app)
-app.secret_key = 'herdem1940gizlianahtar'
-app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 dakika oturum süresi
+app.secret_key = "herdemsecretkey123"  # Session için gerekli
+
+# Sabit kullanıcı bilgileri
+KULLANICI_ADI = "herdem"
+SIFRE = "1940"
+UYGULAMA_KODU = "kmop hzuo yoqp ztnr"
+
+# E-posta ayarları
+GONDEREN_EMAIL = "herdemerasmus@gmail.com"
+ALICI_EMAIL = "hidayete369@gmail.com"
 
 # Sabit anahtarlar ile veri sözlüğü
 data_dict = {
@@ -22,29 +27,27 @@ data_dict = {
     "perde": False
 }
 
-# Otomatik kapi kapatma görevi
-def otomatik_kapi_kapat():
-    time.sleep(10)  # 10 saniye bekle
-    data_dict["kapi"] = False
-    print("Kapı otomatik olarak kapatıldı.")
-
-# Kullanıcı bilgileri
-KULLANICI_ADI = "herdem"
-SIFRE = "1940"
-
-# Mail göndermek için bilgiler
-GONDEREN_EMAIL = "herdemerasmus@gmail.com"
-ALICI_EMAIL = "hidayete369@gmail.com"
-UYGULAMA_KODU = "kmop hzuo yoqp ztnr"
-
-# Onay kodları saklamak için sözlük
+# Doğrulama kodları için geçici depolama
 onay_kodlari = {}
 
+# Oturum gerektiren sayfalar için dekoratör
+def oturum_gerekli(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'giris_yapildi' not in session or not session['giris_yapildi']:
+            return redirect(url_for('giris_sayfasi'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Kapı otomatik kapanma işlevi
+def kapi_otomatik_kapat():
+    time.sleep(10)  # 10 saniye bekle
+    data_dict["kapi"] = False
+    print("Kapı otomatik olarak kapatıldı")
+
 @app.route('/')
-def ana_sayfa():
-    """Ana sayfa - Giriş ekranına yönlendir"""
-    if 'kullanici_adi' in session:
-        return redirect(url_for('dashboard'))
+def giris_sayfasi():
+    """Giriş sayfasını göster"""
     return render_template('giris.html')
 
 @app.route('/giris', methods=['POST'])
@@ -54,101 +57,94 @@ def giris_kontrol():
     sifre = request.form.get('sifre')
     
     if kullanici_adi == KULLANICI_ADI and sifre == SIFRE:
-        # Onay kodu oluştur
-        onay_kodu = ''.join(random.choices(string.digits, k=6))
-        onay_kodlari[kullanici_adi] = onay_kodu
+        # Doğrulama kodu oluştur ve e-posta gönder
+        import random
+        dogrulama_kodu = str(random.randint(100000, 999999))
+        session['dogrulama_kodu'] = dogrulama_kodu
         
-        # E-posta gönder
+        # E-posta gönderme
+        baslik = "Giriş Doğrulama Kodu"
+        icerik = f"Merhaba {kullanici_adi},\n\nGiriş doğrulama kodunuz: {dogrulama_kodu}\n\nUygulama kodu: {UYGULAMA_KODU}"
+        
         try:
-            gonder_onay_maili(onay_kodu)
-            return render_template('onay.html', kullanici_adi=kullanici_adi)
+            email_gonder(GONDEREN_EMAIL, ALICI_EMAIL, baslik, icerik)
+            return render_template('dogrulama.html')
         except Exception as e:
-            return render_template('giris.html', hata=f"E-posta gönderilirken hata oluştu: {str(e)}")
+            return render_template('giris.html', hata=f"E-posta gönderme hatası: {str(e)}")
     else:
-        return render_template('giris.html', hata="Kullanıcı adı veya şifre hatalı")
+        return render_template('giris.html', hata="Kullanıcı adı veya şifre hatalı!")
 
-def gonder_onay_maili(kod):
-    """Onay e-postası gönder"""
-    mesaj = MIMEMultipart()
-    mesaj['From'] = GONDEREN_EMAIL
-    mesaj['To'] = ALICI_EMAIL
-    mesaj['Subject'] = "Akıllı Ev Sistemi Giriş Onay Kodu"
+def email_gonder(gonderen, alici, baslik, icerik):
+    """Basit e-posta gönderme simülasyonu"""
+    # Gerçek bir uygulamada SMTP sunucusu ile e-posta gönderilir
+    # Bu örnek için sadece simülasyon yapıyoruz
+    print(f"E-posta gönderildi:")
+    print(f"Kimden: {gonderen}")
+    print(f"Kime: {alici}")
+    print(f"Konu: {baslik}")
+    print(f"İçerik: {icerik}")
     
-    icerik = f"""
-    Merhaba,
-    
-    Akıllı ev sistemine giriş için onay kodunuz: {kod}
-    
-    Bu kodu giriş ekranında kullanınız.
-    
-    İyi günler.
+    # Gerçek e-posta göndermek için yorum satırlarını kaldırın:
     """
-    
+    mesaj = MIMEMultipart()
+    mesaj['From'] = gonderen
+    mesaj['To'] = alici
+    mesaj['Subject'] = baslik
     mesaj.attach(MIMEText(icerik, 'plain'))
     
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(GONDEREN_EMAIL, UYGULAMA_KODU)
-    server.send_message(mesaj)
-    server.quit()
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        server.starttls()
+        server.login(gonderen, 'uygulama_sifresi')  # Gmail için uygulama şifresi gerekir
+        server.send_message(mesaj)
+    """
+    return True
 
-@app.route('/onay', methods=['POST'])
-def onay_kontrol():
-    """Onay kodunu kontrol et"""
-    kullanici_adi = request.form.get('kullanici_adi')
-    onay_kodu = request.form.get('onay_kodu')
+@app.route('/dogrulama', methods=['POST'])
+def dogrulama_kontrol():
+    """Doğrulama kodunu kontrol et"""
+    dogrulama_kodu = request.form.get('dogrulama_kodu')
+    uygulama_kodu = request.form.get('uygulama_kodu')
     
-    if kullanici_adi in onay_kodlari and onay_kodlari[kullanici_adi] == onay_kodu:
-        session['kullanici_adi'] = kullanici_adi
-        del onay_kodlari[kullanici_adi]  # Kullanılmış kodu sil
+    if dogrulama_kodu == session.get('dogrulama_kodu') and uygulama_kodu == UYGULAMA_KODU:
+        session['giris_yapildi'] = True
         return redirect(url_for('dashboard'))
     else:
-        return render_template('onay.html', kullanici_adi=kullanici_adi, hata="Geçersiz onay kodu")
+        return render_template('dogrulama.html', hata="Doğrulama kodu veya uygulama kodu hatalı!")
 
 @app.route('/dashboard')
+@oturum_gerekli
 def dashboard():
-    """Dashboard sayfası"""
-    if 'kullanici_adi' not in session:
-        return redirect(url_for('ana_sayfa'))
-    return render_template('dashboard.html', veriler=data_dict)
+    """Dashboard sayfasını göster"""
+    return render_template('dashboard.html', data=data_dict)
 
-@app.route('/cikis')
-def cikis():
-    """Oturumu sonlandır"""
-    session.pop('kullanici_adi', None)
-    return redirect(url_for('ana_sayfa'))
-
-@app.route('/api/veri', methods=['GET'])
+@app.route('/veri', methods=['GET'])
+@oturum_gerekli
 def veri_getir():
-    """Veri sözlüğünden veri getir"""
-    if 'kullanici_adi' not in session:
-        return jsonify({"hata": "Yetkisiz erişim"}), 401
-    
-    return jsonify(data_dict), 200
+    """AJAX ile veri alımı için endpoint"""
+    return jsonify(data_dict)
 
-@app.route('/api/guncelle', methods=['POST'])
+@app.route('/guncelle', methods=['POST'])
+@oturum_gerekli
 def veri_guncelle():
-    """Veri sözlüğündeki değerleri güncelle"""
-    if 'kullanici_adi' not in session:
-        return jsonify({"hata": "Yetkisiz erişim"}), 401
-    
-    data = request.get_json()
-    
-    if not data:
-        return jsonify({"hata": "Güncellenecek en az bir değer gerekli"}), 400
+    """AJAX ile veri güncelleme için endpoint"""
+    yeni_data = request.get_json()
     
     # Değerleri güncelle
-    for key, value in data.items():
+    for key, value in yeni_data.items():
         if key in data_dict:
             data_dict[key] = value
             
-            # Eğer kapı açıldıysa, 10 saniye sonra otomatik kapanacak
+            # Kapı açıldıysa, 10 saniye sonra otomatik kapanma için thread başlat
             if key == "kapi" and value == True:
-                thread = threading.Thread(target=otomatik_kapi_kapat)
-                thread.daemon = True
-                thread.start()
+                threading.Thread(target=kapi_otomatik_kapat).start()
     
-    return jsonify({"basari": True, "veriler": data_dict}), 200
+    return jsonify({"success": True, "data": data_dict})
+
+@app.route('/cikis')
+def cikis():
+    """Kullanıcı çıkışı"""
+    session.clear()
+    return redirect(url_for('giris_sayfasi'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
