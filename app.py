@@ -84,8 +84,7 @@ def email_gonder(gonderen, alici, baslik, icerik):
     print(f"Konu: {baslik}")
     print(f"İçerik: {icerik}")
     
-    # Gerçek e-posta göndermek için yorum satırlarını kaldırın:
-    """
+    
     mesaj = MIMEMultipart()
     mesaj['From'] = gonderen
     mesaj['To'] = alici
@@ -96,7 +95,7 @@ def email_gonder(gonderen, alici, baslik, icerik):
         server.starttls()
         server.login(gonderen, 'uygulama_sifresi')  # Gmail için uygulama şifresi gerekir
         server.send_message(mesaj)
-    """
+    
     return True
 
 @app.route('/dogrulama', methods=['POST'])
