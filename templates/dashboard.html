@@ -3,143 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İTÜ MTAL Akıllı Ev Kontrol Paneli</title>
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/static/css/dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <title>Akıllı Ev Sistemi - Kontrol Paneli</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="header">
-        <img src="https://itumtal.com/belgeler/LOGO_Sunum/ITU_MTAL_Logo-01.png" alt="İTÜ MTAL Logo" class="logo">
-        <h1>Akıllı Ev Kontrol Paneli</h1>
-    </div>
-
     <div class="dashboard-container">
-        <div class="side-panel">
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span>Hoş Geldiniz, Herdem</span>
+        <header class="dashboard-header">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Akıllı Ev Sistemi Logo" class="logo-small">
+                <h1>Akıllı Ev Kontrol Paneli</h1>
             </div>
-            <div class="menu">
-                <div class="menu-item active">
-                    <i class="fas fa-home"></i>
-                    <span>Ana Sayfa</span>
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>İstatistikler</span>
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Ayarlar</span>
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Yardım</span>
-                </div>
+            <div class="header-buttons">
+                <button id="refreshButton" class="refresh-button">
+                    <i class="fas fa-sync-alt"></i> Yenile
+                </button>
+                <a href="{{ url_for('logout') }}" class="logout-button">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış
+                </a>
             </div>
-        </div>
-
-        <div class="main-content">
-            <div class="status-bar">
-                <div class="status">
-                    <span>Durum:</span>
-                    <span class="status-indicator online">Çevrimiçi</span>
+        </header>
+        
+        <div class="controls-container">
+            <div class="control-item">
+                <div class="control-icon">
+                    <i class="fas fa-door-closed" id="kapiIcon"></i>
                 </div>
-                <div class="refresh-container">
-                    <button id="yenileBtn" class="btn">
-                        <i class="fas fa-sync-alt"></i> Yenile
-                    </button>
+                <div class="control-info">
+                    <h3>Kapı</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="kapiControl">
+                        <span class="slider round"></span>
+                    </label>
+                    <p id="kapiStatus" class="status-text">Kapalı</p>
                 </div>
             </div>
             
-            <div class="controls-grid">
-                <!-- Kapı Kontrolü -->
-                <div class="control-card animate__animated animate__fadeIn">
-                    <div class="control-header">
-                        <i class="fas fa-door-open"></i>
-                        <h3>Kapı Kontrolü</h3>
-                    </div>
-                    <div class="control-status">
-                        <div class="status-text">Durum: <span id="kapiDurum">Kapalı</span></div>
-                    </div>
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="kapiToggle" class="toggle">
-                        <label for="kapiToggle" class="toggle-label">
-                            <span class="toggle-inner"></span>
-                            <span class="toggle-switch"></span>
-                        </label>
-                    </div>
-                    <div id="kapi-timer" class="timer-indicator" style="display: none;">
-                        <i class="fas fa-clock"></i> <span id="kapi-timer-count">10</span> sn sonra kapanacak
-                    </div>
+            <div class="control-item">
+                <div class="control-icon">
+                    <i class="fas fa-fan" id="vantilatorIcon"></i>
                 </div>
-
-                <!-- Vantilatör Kontrolü -->
-                <div class="control-card animate__animated animate__fadeIn">
-                    <div class="control-header">
-                        <i class="fas fa-fan"></i>
-                        <h3>Vantilatör Kontrolü</h3>
-                    </div>
-                    <div class="control-status">
-                        <div class="status-text">Durum: <span id="ventilatorDurum">Kapalı</span></div>
-                    </div>
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="ventilatorToggle" class="toggle">
-                        <label for="ventilatorToggle" class="toggle-label">
-                            <span class="toggle-inner"></span>
-                            <span class="toggle-switch"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Pencere Kontrolü -->
-                <div class="control-card animate__animated animate__fadeIn">
-                    <div class="control-header">
-                        <i class="fas fa-window-maximize"></i>
-                        <h3>Pencere Kontrolü</h3>
-                    </div>
-                    <div class="control-status">
-                        <div class="status-text">Durum: <span id="pencereDurum">Kapalı</span></div>
-                    </div>
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="pencereToggle" class="toggle">
-                        <label for="pencereToggle" class="toggle-label">
-                            <span class="toggle-inner"></span>
-                            <span class="toggle-switch"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Perde Kontrolü -->
-                <div class="control-card animate__animated animate__fadeIn">
-                    <div class="control-header">
-                        <i class="fas fa-blinds"></i>
-                        <h3>Perde Kontrolü</h3>
-                    </div>
-                    <div class="control-status">
-                        <div class="status-text">Durum: <span id="perdeDurum">Kapalı</span></div>
-                    </div>
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="perdeToggle" class="toggle">
-                        <label for="perdeToggle" class="toggle-label">
-                            <span class="toggle-inner"></span>
-                            <span class="toggle-switch"></span>
-                        </label>
-                    </div>
+                <div class="control-info">
+                    <h3>Vantilatör</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="vantilatorControl">
+                        <span class="slider round"></span>
+                    </label>
+                    <p id="vantilatorStatus" class="status-text">Kapalı</p>
                 </div>
             </div>
-
-            <div class="save-changes">
-                <button id="kaydetBtn" class="save-btn">
-                    <i class="fas fa-save"></i> Değişiklikleri Kaydet
-                </button>
-                <div id="bildirim" class="notification" style="display: none;"></div>
+            
+            <div class="control-item">
+                <div class="control-icon">
+                    <i class="fas fa-window-maximize" id="pencereIcon"></i>
+                </div>
+                <div class="control-info">
+                    <h3>Pencere</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="pencereControl">
+                        <span class="slider round"></span>
+                    </label>
+                    <p id="pencereStatus" class="status-text">Kapalı</p>
+                </div>
             </div>
+            
+            <div class="control-item">
+                <div class="control-icon">
+                    <i class="fas fa-blinds" id="perdeIcon"></i>
+                </div>
+                <div class="control-info">
+                    <h3>Perde</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="perdeControl">
+                        <span class="slider round"></span>
+                    </label>
+                    <p id="perdeStatus" class="status-text">Kapalı</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="save-container">
+            <button id="saveChangesButton" class="save-button">
+                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+            </button>
+            <div id="saveMessage" class="save-message"></div>
         </div>
     </div>
 
-    <script src="/static/js/dashboard.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
