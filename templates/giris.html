@@ -2,31 +2,18 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Sayfası</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Giriş Yap</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="login-form">
-            <h2>Sisteme Giriş</h2>
-            {% if hata %}
-            <div class="error-message">{{ hata }}</div>
-            {% endif %}
-            <form method="POST" action="{{ url_for('giris_kontrol') }}">
-                <div class="form-group">
-                    <label for="kullanici_adi">Kullanıcı Adı:</label>
-                    <input type="text" id="kullanici_adi" name="kullanici_adi" required>
-                </div>
-                <div class="form-group">
-                    <label for="sifre">Şifre:</label>
-                    <input type="password" id="sifre" name="sifre" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn">Giriş Yap</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <h2>Akıllı Ev Giriş</h2>
+    {% if hata %}
+        <p class="hata">{{ hata }}</p>
+    {% endif %}
+    <form action="/giris" method="POST">
+        <input type="text" name="kullanici_adi" placeholder="Kullanıcı Adı" required>
+        <input type="password" name="sifre" placeholder="Şifre" required>
+        <button type="submit">Giriş Yap</button>
+    </form>
 </body>
 </html>
