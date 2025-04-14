@@ -2,32 +2,18 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doğrulama Sayfası</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Giriş Yap</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="login-form">
-            <h2>Doğrulama</h2>
-            <p>E-posta adresinize doğrulama kodu gönderildi. Lütfen e-postanızı kontrol edin.</p>
-            {% if hata %}
-            <div class="error-message">{{ hata }}</div>
-            {% endif %}
-            <form method="POST" action="{{ url_for('dogrulama_kontrol') }}">
-                <div class="form-group">
-                    <label for="dogrulama_kodu">Doğrulama Kodu:</label>
-                    <input type="text" id="dogrulama_kodu" name="dogrulama_kodu" required>
-                </div>
-                <div class="form-group">
-                    <label for="uygulama_kodu">Uygulama Kodu:</label>
-                    <input type="text" id="uygulama_kodu" name="uygulama_kodu" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn">Doğrula</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <h2>Akıllı Ev Giriş</h2>
+    {% if hata %}
+        <p class="hata">{{ hata }}</p>
+    {% endif %}
+    <form action="/giris" method="POST">
+        <input type="text" name="kullanici_adi" placeholder="Kullanıcı Adı" required>
+        <input type="password" name="sifre" placeholder="Şifre" required>
+        <button type="submit">Giriş Yap</button>
+    </form>
 </body>
 </html>
