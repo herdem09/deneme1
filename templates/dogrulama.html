@@ -2,18 +2,18 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Giriş Yap</title>
+    <title>Doğrulama</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h2>Akıllı Ev Giriş</h2>
+    <h2>Doğrulama</h2>
     {% if hata %}
         <p class="hata">{{ hata }}</p>
     {% endif %}
-    <form action="/giris" method="POST">
-        <input type="text" name="kullanici_adi" placeholder="Kullanıcı Adı" required>
-        <input type="password" name="sifre" placeholder="Şifre" required>
-        <button type="submit">Giriş Yap</button>
+    <form action="/dogrulama" method="POST">
+        <input type="text" name="dogrulama_kodu" placeholder="Kod" required>
+        <input type="text" name="uygulama_kodu" placeholder="Uygulama Kodu" required>
+        <button type="submit">Girişe Devam</button>
     </form>
 </body>
 </html>
