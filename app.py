@@ -103,13 +103,13 @@ def email_gonder(gonderen, alici, baslik, icerik):
 def dogrulama_kontrol():
     """Doğrulama kodunu kontrol et"""
     dogrulama_kodu = request.form.get('dogrulama_kodu')
-    uygulama_kodu = request.form.get('uygulama_kodu')
     
-    if dogrulama_kodu == session.get('dogrulama_kodu') and uygulama_kodu == UYGULAMA_KODU:
+    if dogrulama_kodu == session.get('dogrulama_kodu'):
         session['giris_yapildi'] = True
         return redirect(url_for('dashboard'))
     else:
-        return render_template('dogrulama.html', hata="Doğrulama kodu veya uygulama kodu hatalı!")
+        return render_template('dogrulama.html', hata="Doğrulama kodu hatalı!")
+
 
 @app.route('/dashboard')
 @oturum_gerekli
