@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akıllı Ev Sistemi - Giriş</title>
-    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+    <title>Giriş Sayfası</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Akıllı Ev Sistemi Logo" class="logo">
-        </div>
-        <h1>Akıllı Ev Sistemi</h1>
-        <div class="form-container">
-            <h2>Giriş Yap</h2>
+        <div class="login-form">
+            <h2>Sisteme Giriş</h2>
             {% if hata %}
-                <div class="error-message">{{ hata }}</div>
+            <div class="error-message">{{ hata }}</div>
             {% endif %}
-            <form action="/giris" method="POST">
+            <form method="POST" action="{{ url_for('giris_kontrol') }}">
                 <div class="form-group">
                     <label for="kullanici_adi">Kullanıcı Adı:</label>
                     <input type="text" id="kullanici_adi" name="kullanici_adi" required>
@@ -27,7 +22,9 @@
                     <label for="sifre">Şifre:</label>
                     <input type="password" id="sifre" name="sifre" required>
                 </div>
-                <button type="submit" class="btn">Giriş Yap</button>
+                <div class="form-group">
+                    <button type="submit" class="btn">Giriş Yap</button>
+                </div>
             </form>
         </div>
     </div>
