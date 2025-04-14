@@ -2,145 +2,46 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontrol Paneli</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
     <script>
-        // Sayfa yüklendiğinde çalışacak fonksiyon
-        document.addEventListener('DOMContentLoaded', function() {
-            // Verileri yükle
-            yenileVerileri();
-            
-            // Form gönderimi engelle ve AJAX ile yap
-            document.getElementById('kontrolForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                degisiklikleriKaydet();
-            });
-            
-            // Yenile butonu için
-            document.getElementById('yenileBtn').addEventListener('click', function() {
-                yenileVerileri();
-            });
-        });
-        
-        // Verileri sunucudan alıp ekrana yansıt
-        function yenileVerileri() {
-            fetch('/veri')
-                .then(response => response.json())
-                .then(data => {
-                    // Switch butonlarını güncelle
-                    document.getElementById('kapi').checked = data.kapi;
-                    document.getElementById('vantilator').checked = data.vantilator;
-                    document.getElementById('pencere').checked = data.pencere;
-                    document.getElementById('perde').checked = data.perde;
-                    
-                    // Durum bilgilerini güncelle
-                    document.getElementById('kapiDurum').textContent = data.kapi ? 'Açık' : 'Kapalı';
-                    document.getElementById('vantilatorDurum').textContent = data.vantilator ? 'Açık' : 'Kapalı';
-                    document.getElementById('pencereDurum').textContent = data.pencere ? 'Açık' : 'Kapalı';
-                    document.getElementById('perdeDurum').textContent = data.perde ? 'Açık' : 'Kapalı';
-                })
-                .catch(error => {
-                    console.error('Veri alma hatası:', error);
-                    alert('Veriler yüklenirken bir hata oluştu!');
-                });
+        async function veriYenile() {
+            const response = await fetch('/veri');
+            const data = await response.json();
+
+            for (let key in data) {
+                document.getElementById(key).checked = data[key];
+            }
         }
-        
-        // Değişiklikleri kaydet
-        function degisiklikleriKaydet() {
-            const yeniData = {
-                kapi: document.getElementById('kapi').checked,
-                vantilator: document.getElementById('vantilator').checked,
-                pencere: document.getElementById('pencere').checked,
-                perde: document.getElementById('perde').checked
-            };
-            
-            fetch('/guncelle', {
+
+        async function guncelle(key) {
+            const checked = document.getElementById(key).checked;
+            const data = {};
+            data[key] = checked;
+
+            await fetch('/guncelle', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(yeniData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if(result.success) {
-                    alert('Değişiklikler kaydedildi!');
-                    yenileVerileri();
-                }
-            })
-            .catch(error => {
-                console.error('Güncelleme hatası:', error);
-                alert('Değişiklikler kaydedilirken bir hata oluştu!');
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
             });
+
+            if (key === "kapi" && checked) {
+                setTimeout(veriYenile, 11000);  // 11 saniye sonra güncelle
+            }
         }
+
+        setInterval(veriYenile, 3000);  // Her 3 saniyede bir güncelle
+        window.onload = veriYenile;
     </script>
 </head>
 <body>
-    <div class="container">
-        <div class="dashboard">
-            <h2>Kontrol Paneli</h2>
-            
-            <form id="kontrolForm">
-                <div class="control-panel">
-                    <h3>Cihaz Kontrolleri</h3>
-                    
-                    <div class="control-item">
-                        <label class="switch-label">
-                            <span>Kapı:</span>
-                            <span id="kapiDurum" class="status">{{ "Açık" if data.kapi else "Kapalı" }}</span>
-                        </label>
-                        <label class="switch">
-                            <input type="checkbox" id="kapi" name="kapi" {{ "checked" if data.kapi else "" }}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="control-item">
-                        <label class="switch-label">
-                            <span>Vantilatör:</span>
-                            <span id="vantilatorDurum" class="status">{{ "Açık" if data.vantilator else "Kapalı" }}</span>
-                        </label>
-                        <label class="switch">
-                            <input type="checkbox" id="vantilator" name="vantilator" {{ "checked" if data.vantilator else "" }}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="control-item">
-                        <label class="switch-label">
-                            <span>Pencere:</span>
-                            <span id="pencereDurum" class="status">{{ "Açık" if data.pencere else "Kapalı" }}</span>
-                        </label>
-                        <label class="switch">
-                            <input type="checkbox" id="pencere" name="pencere" {{ "checked" if data.pencere else "" }}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="control-item">
-                        <label class="switch-label">
-                            <span>Perde:</span>
-                            <span id="perdeDurum" class="status">{{ "Açık" if data.perde else "Kapalı" }}</span>
-                        </label>
-                        <label class="switch">
-                            <input type="checkbox" id="perde" name="perde" {{ "checked" if data.perde else "" }}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button type="submit" class="btn">Değişiklikleri Kaydet</button>
-                        <button type="button" id="yenileBtn" class="btn btn-secondary">Verileri Yenile</button>
-                        <a href="{{ url_for('cikis') }}" class="btn btn-danger">Çıkış Yap</a>
-                    </div>
-                </div>
-            </form>
-            
-            <div class="note">
-                <p><strong>Not:</strong> Kapı açıldığında 10 saniye sonra otomatik olarak kapanacaktır.</p>
-            </div>
-        </div>
+    <h2>Akıllı Ev Kontrol Paneli</h2>
+    <div class="kontroller">
+        <label><input type="checkbox" id="kapi" onchange="guncelle('kapi')"> Kapı</label>
+        <label><input type="checkbox" id="pencere" onchange="guncelle('pencere')"> Pencere</label>
+        <label><input type="checkbox" id="perde" onchange="guncelle('perde')"> Perde</label>
+        <label><input type="checkbox" id="vantilator" onchange="guncelle('vantilator')"> Vantilatör</label>
     </div>
+    <a href="/cikis">Çıkış Yap</a>
 </body>
 </html>
