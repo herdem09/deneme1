@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eef2f3;
+    text-align: center;
+    padding: 30px;
+}
+
+h2 {
+    color: #333;
+}
+
+form, .kontroller {
+    display: inline-block;
+    margin-top: 20px;
+    text-align: left;
+}
+
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    margin: 5px;
+    width: 200px;
+    display: block;
+}
+
+button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+label {
+    display: block;
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+a {
+    display: block;
+    margin-top: 20px;
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.hata {
+    color: red;
+    font-weight: bold;
+}
